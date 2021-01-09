@@ -1,6 +1,15 @@
+const { resolve } = require("path")
+
 const PENDING = 'PENDING'
 const RESOLVE = 'RESOLVE'
 const REJECTED = 'REJECTED'
+
+const safelyResolvePromise = (promise, x, resolve, reject) => {
+    // 1、x不能是promise
+    if(promise === x) {
+        return reject(new TypeError("promise 不能返回当前的 promise"))
+    }
+}
 
 class myPromise {
     constructor(executor) {
@@ -32,24 +41,38 @@ class myPromise {
             reject(e)  //执行发生错误。默认调用了reject方法
         }
     }
-    // 接受两个参数
+    // 接受两个参数, 里面的执行就是异步的
     then(onfulfilled, onrejected) {
-        // 同步
-        if(this.state === RESOLVE) {
-            onfulfilled(this.result)
-        }
-        if(this.state === REJECTED) {
-            onrejected(this.reason)
-        }
-        // 异步
-        if(this.state === PENDING) {
-            this.onReolvedCallbacks.push(() => {
-                onfulfilled(this.result)
-            })
-            this.onRejectedCallbacks.push(() => {
-                onrejected(this.reason)
-            })
-        }
+        // (resolve, reject) => {} 组成的executor 会立即执行
+        let promise = new myPromise((resolve, reject) => {
+            // 同步
+            if(this.state === RESOLVE) {
+                setTimeout(() => {
+                    try {
+                        let x = onfulfilled(this.result)
+                        // data可能是普通值，也可能是promise
+                        safelyResolvePromise(promise, x, resolve, reject)
+                    }catch(e) {
+                        reject(e)
+                    }
+                }, 0)
+            }
+            if(this.state === REJECTED) {
+                let err = onrejected(this.reason)
+                reject(err)
+            }
+            // 异步
+            if(this.state === PENDING) {
+                this.onReolvedCallbacks.push(() => {
+                    onfulfilled(this.result)
+                })
+                this.onRejectedCallbacks.push(() => {
+                    onrejected(this.reason)
+                })
+            }
+        })
+        
+        return promise
     }
 }
 

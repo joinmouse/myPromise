@@ -22,10 +22,11 @@ new myPromise((resolve, reject) => {
 })
 
 // 测试异步
+console.log('---- 测试异步 ----')
 let promise = new myPromise((resolve, reject) => {
     setTimeout(() => {
         resolve('异步执行')
-    })
+    }, 0)
 })
 promise.then(data => {
     console.log(data)
@@ -39,6 +40,32 @@ promise.then(data => {
 })
 promise.then(data => {
     console.log(data)
+    console.log('---- 测试异步 ----')
 }, err => {
+    console.log(err)
+    console.log('---- 测试异步 ----')
+})
+
+
+let p = new myPromise((resolve, reject) => {
+    resolve(10)
+})
+p.then(data => {
+    console.log(data)
+    return 100
+}).then(data => {
+    console.log(data)
+})
+
+// promise不能自己返回自己
+let promise1 = new myPromise((resolve, reject) => {
+    resolve()
+})
+let promise2 = promise1.then(() => {
+    return promise2
+}, err => {
+    console.log(err)
+})
+promise2.then(null, err => {
     console.log(err)
 })
