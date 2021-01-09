@@ -16,12 +16,14 @@ class myPromise {
             if(this.state === PENDING) {
                 this.state = RESOLVE
                 this.result = result
+                this.onReolvedCallbacks.forEach(fn => fn())
             }
         }
         let reject= (reason) => {
             if(this.state === PENDING) {
                 this.state = REJECTED
                 this.reason = reason
+                this.onRejectedCallbacks.forEach(fn => fn())
             }
         }
         try {
@@ -32,12 +34,14 @@ class myPromise {
     }
     // 接受两个参数
     then(onfulfilled, onrejected) {
+        // 同步
         if(this.state === RESOLVE) {
             onfulfilled(this.result)
         }
         if(this.state === REJECTED) {
             onrejected(this.reason)
         }
+        // 异步
         if(this.state === PENDING) {
             this.onReolvedCallbacks.push(() => {
                 onfulfilled(this.result)
