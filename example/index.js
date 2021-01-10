@@ -79,3 +79,14 @@ promise2.then(res => {
 }).then(res => {
     console.log(res)
 })
+
+// 可选参数调用
+let promiseA = new myPromise((resolve, reject) => {
+    // resolve('promiseA')  
+    reject('err')
+})
+promiseA.then().then().then(res => {
+    console.log(res)
+}, err => {
+    console.log(err)
+})

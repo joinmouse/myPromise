@@ -2,35 +2,6 @@ const PENDING = 'PENDING'
 const RESOLVE = 'RESOLVE'
 const REJECTED = 'REJECTED'
 
-const safelyResolvePromise = (promise, x, resolve, reject) => {
-    // 1、x不能是promise
-    if(promise === x) {
-        return reject(new TypeError("promise 不能返回当前的 promise"))
-    }
-    // 判断x的类型是否问promise
-    if((typeof x === 'object' && x !== null) || typeof x === 'function') {
-        try {
-            let then = x.then  // 取then有可能出错
-            // 当前有then方法，就认为其是一个promise
-            if(typeof then === 'function') {
-                then.call(x, res => {  //res可能是promise就递归一下，知道解出来的是一个普通值
-                    safelyResolvePromise(promise, res, resolve, reject)
-                }, err => {
-                    reject(err)
-                })
-            }else {
-                // {then: 1}
-                resolve(x)
-            }
-        }catch(e) {
-            reject(e)
-        }
-    }else {
-        // x的值返回的是一个普通值
-        resolve(x)
-    }
-}
-
 class myPromise {
     constructor(executor) {
         this.state = PENDING  // 默认是pending状态
@@ -61,8 +32,12 @@ class myPromise {
             reject(e)  //执行发生错误。默认调用了reject方法
         }
     }
-    // 接受两个参数, 里面的执行就是异步的
+    // 接受两个可选参数: onfulfilled, onrejected, 里面的执行就是异步的
     then(onfulfilled, onrejected) {
+        // 对可选参数的处理
+        onfulfilled = (typeof onfulfilled === 'function' ? onfulfilled : data => data)
+        onrejected = (typeof onrejected === 'function' ? onrejected : err => { throw err })
+
         // (resolve, reject) => {} 组成的executor 会立即执行
         let promise = new myPromise((resolve, reject) => {
             // 同步
@@ -114,6 +89,53 @@ class myPromise {
         })
         return promise
     }
+}
+
+const safelyResolvePromise = (promise, x, resolve, reject) => {
+    // 1、x不能是promise
+    if(promise === x) {
+        return reject(new TypeError("循环引用"))
+    }
+    // 判断x的类型是否问promise
+    let called = false
+    if((typeof x === 'object' && x !== null) || typeof x === 'function') {
+        try {
+            let then = x.then  // 取then有可能出错
+            // 当前有then方法，就认为其是一个promise
+            if(typeof then === 'function') {
+                then.call(x, res => {  
+                    if(called) return
+                    called = true
+                    // res可能是promise就递归一下，知道解出来的是一个普通值
+                    safelyResolvePromise(promise, res, resolve, reject)  
+                }, err => {
+                    if(called) return
+                    called = true
+                    reject(err)
+                })
+            }else {
+                // {then: 1}
+                resolve(x)
+            }
+        }catch(e) {
+            if(called) return
+            called = true
+            reject(e)
+        }
+    }else {
+        // x的值返回的是一个普通值
+        resolve(x)
+    }
+}
+
+// 测试部分
+myPromise.defer = myPromise.deferred = function () {
+    let dfd = {};
+    dfd.promise = new myPromise((resolve, reject) => {
+        dfd.resolve = resolve;
+        dfd.reject = reject;
+    });
+    return dfd;
 }
 
 module.exports = myPromise

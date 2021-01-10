@@ -1,0 +1,23 @@
+{
+  "name": "myPromise",
+  "version": "1.0.0",
+  "description": "实现一个符合PromiseA+规范标准的promise",
+  "main": "myPromise.js",
+  "scripts": {
+    "test": "promises-aplus-tests ./myPromise.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joinmouse/myPromise.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joinmouse/myPromise/issues"
+  },
+  "homepage": "https://github.com/joinmouse/myPromise#readme",
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}
