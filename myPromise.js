@@ -78,20 +78,40 @@ class myPromise {
                 }, 0)
             }
             if(this.state === REJECTED) {
-                let err = onrejected(this.reason)
-                reject(err)
+                setTimeout(() => {
+                    try {
+                        let x = onrejected(this.reason)
+                        safelyResolvePromise(promise, x, resolve, reject)
+                    }catch(e) {
+                        reject(e)
+                    }
+                }, 0)
             }
             // 异步
             if(this.state === PENDING) {
                 this.onReolvedCallbacks.push(() => {
-                    onfulfilled(this.result)
+                    setTimeout(() => {
+                        try {
+                            let x = onfulfilled(this.result)
+                            safelyResolvePromise(promise, x, resolve, reject)
+                        }catch(e) {
+                            reject(e)
+                        }
+                    }, 0)
+                    
                 })
                 this.onRejectedCallbacks.push(() => {
-                    onrejected(this.reason)
+                    setTimeout(() => {
+                        try {
+                            let x = onrejected(this.reason)
+                            safelyResolvePromise(promise, x, resolve, reject)
+                        }catch(e) {
+                            reject(e)
+                        }
+                    }, 0)
                 })
             }
         })
-        
         return promise
     }
 }

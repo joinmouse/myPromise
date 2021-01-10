@@ -74,7 +74,6 @@ let promise2 = promise1.then((res) => {
 promise2.then(res => {
     console.log('执行啦~')
     console.log(res)
-    return 1111
 }, err => {
     console.log(err)
 }).then(res => {
