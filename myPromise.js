@@ -91,6 +91,12 @@ class myPromise {
         return promise
     }
 
+    // myPromise.prototype.catch方法
+    catch(onrejected) {
+        return this.then(null, onrejected)
+    }
+
+    // myPromise.prototype.finally方法
     finally(cb) {
         return this.then(
             data => myPromise.resolve(cb()).then(() => data),
