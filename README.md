@@ -8,4 +8,5 @@
 
 ###
 PromiseA+规范英文: https://promisesaplus.com/#notes
+
 PromiseA+规范翻译: https://www.ituring.com.cn/article/66566
