@@ -1,5 +1,3 @@
-const { resolve } = require("path")
-
 const PENDING = 'PENDING'
 const RESOLVE = 'RESOLVE'
 const REJECTED = 'REJECTED'
@@ -8,6 +6,28 @@ const safelyResolvePromise = (promise, x, resolve, reject) => {
     // 1、x不能是promise
     if(promise === x) {
         return reject(new TypeError("promise 不能返回当前的 promise"))
+    }
+    // 判断x的类型是否问promise
+    if((typeof x === 'object' && x !== null) || typeof x === 'function') {
+        try {
+            let then = x.then  // 取then有可能出错
+            // 当前有then方法，就认为其是一个promise
+            if(typeof then === 'function') {
+                then.call(x, res => {  //res可能是promise就递归一下，知道解出来的是一个普通值
+                    safelyResolvePromise(promise, res, resolve, reject)
+                }, err => {
+                    reject(err)
+                })
+            }else {
+                // {then: 1}
+                resolve(x)
+            }
+        }catch(e) {
+            reject(e)
+        }
+    }else {
+        // x的值返回的是一个普通值
+        resolve(x)
     }
 }
 
