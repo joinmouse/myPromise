@@ -1,5 +1,16 @@
 # myPromise
-实现一个完全符合PromiseA+规范标准的promise
+1、实现一个完全符合PromiseA+规范标准的promise
+
+2、实现Promise常用的API, 如下：
+- Promise.prototype.then
+- Promise.prototype.catch
+- Promise.prototype.all
+
+- Promise.resolve
+- Promise.reject
+- Promise.all
+- Promise.race
+
 
 ### 运行测试
 1、yarn add / npm install
