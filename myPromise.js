@@ -135,6 +135,30 @@ class myPromise {
             }
         })
     }
+
+    // 静态方法race
+    static race(values) {
+        return new myPromise((resolve, reject) => {
+            let index = 0
+            function processData(val) {
+                index += 1
+                if(index == 1) {
+                    resolve(val)
+                }
+            }
+
+            for(let i=0; i<values.length; i++) {
+                let current = values[i]
+                if(isPromise(current)) {
+                    current.then((res) => {
+                        processData(res)
+                    }, err => reject(err))
+                }else {
+                    processData(current)
+                }
+            }
+        })
+    }
 }
 
 const safelyResolvePromise = (promise, x, resolve, reject) => {
