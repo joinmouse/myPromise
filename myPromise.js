@@ -91,6 +91,13 @@ class myPromise {
         return promise
     }
 
+    finally(cb) {
+        return this.then(
+            data => myPromise.resolve(cb()).then(() => data),
+            err => myPromise.reject(cb()).then(() => {throw err})
+        )
+    }
+
     // Promise.resolve语法糖
     static resolve(value) {
         // 判断是否是thenable对象
@@ -110,7 +117,7 @@ class myPromise {
         return promise
     }
 
-    // 实现静态方法all
+    // 实现静态方法all, 处理异步并发
     static all(values) {
         return new myPromise((resolve, reject) => {
             let arr = []
