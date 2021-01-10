@@ -1,4 +1,4 @@
-const myPromise = require('./myPromise')
+const myPromise = require('../myPromise')
 
 // 1、测试resolve
 new myPromise((resolve, reject) => {

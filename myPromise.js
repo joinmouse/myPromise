@@ -26,6 +26,7 @@ class myPromise {
                 this.onRejectedCallbacks.forEach(fn => fn())
             }
         }
+
         try {
             executor(resolve, reject)
         }catch(e) {
@@ -89,6 +90,51 @@ class myPromise {
         })
         return promise
     }
+
+    // Promise.resolve语法糖
+    static resolve(value) {
+        // 判断是否是thenable对象
+        if(isPromise(value)) {
+            return value
+        }else {
+            let promise = new myPromise((resolve) => resolve(value))
+            return promise
+        }
+    }
+
+    static reject(err) {
+        // 判断是否是thenable对象
+        let promise = new myPromise((resolve, rej) => {
+            rej(err)
+        })
+        return promise
+    }
+
+    // 实现静态方法all
+    static all(values) {
+        return new myPromise((resolve, reject) => {
+            let arr = []
+            let index = 0
+            function processData(key, val) {
+                arr[key] = val
+                index += 1
+                if(index == values.length) {
+                    resolve(arr)
+                }
+            }
+
+            for(let i=0; i<values.length; i++) {
+                let current = values[i]
+                if(isPromise(current)) {
+                    current.then((res) => {
+                        processData(i, res)
+                    }, err => reject(err))
+                }else {
+                    processData(i, current)
+                }
+            }
+        })
+    }
 }
 
 const safelyResolvePromise = (promise, x, resolve, reject) => {
@@ -103,7 +149,7 @@ const safelyResolvePromise = (promise, x, resolve, reject) => {
             let then = x.then  // 取then有可能出错
             // 当前有then方法，就认为其是一个promise
             if(typeof then === 'function') {
-                then.call(x, res => {  
+                then.call(x, res => {
                     if(called) return
                     called = true
                     // res可能是promise就递归一下，知道解出来的是一个普通值
@@ -125,6 +171,20 @@ const safelyResolvePromise = (promise, x, resolve, reject) => {
     }else {
         // x的值返回的是一个普通值
         resolve(x)
+    }
+}
+
+
+// 按照 PromiseA+ 规范来做的判断
+const isPromise = (value) => {
+    if((typeof value === 'object' && value !== null) || typeof value === 'function') { 
+        if(typeof value.then === 'function') {
+            return true
+        }else {
+            return false
+        }
+    }else {
+        return false
     }
 }
 
